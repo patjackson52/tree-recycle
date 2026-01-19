@@ -24,8 +24,18 @@
   </div>
 
   <div id="map"
-       data-controller="map-state"
-       data-map-state-key-value="admin_<%= @route&.id || @zone&.id || 'all' %>"></div>
+       data-controller="map-state user-location"
+       data-map-state-key-value="admin_<%= @route&.id || @zone&.id || 'all' %>">
+    <!-- Location Controls -->
+    <div class="map-location-controls">
+      <button type="button"
+              class="btn-center-location"
+              data-action="click->user-location#centerOnUser"
+              title="Center on my location">
+        <i class="bi bi-crosshair"></i>
+      </button>
+    </div>
+  </div>
   <script async src="https://maps.googleapis.com/maps/api/js?key=<%= Rails.application.credentials.google_maps.api_key %>&callback=initMap&libraries=marker&v=beta"></script>
 
   <script>
