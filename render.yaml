@@ -1,0 +1,64 @@
+databases:
+  - name: tree-recycle-db
+    databaseName: tree_recycle_production
+    user: tree_recycle
+    plan: free
+
+services:
+  - type: web
+    name: tree-recycle
+    runtime: ruby
+    plan: free
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec puma -C config/puma.rb"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tree-recycle-db
+          property: connectionString
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_SERVE_STATIC_FILES
+        value: true
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      - key: AWS_REGION
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: USPS_USER_ID
+        sync: false
+      - key: ROLLBAR_ACCESS_TOKEN
+        sync: false
+      - key: REDIS_URL
+        sync: false
+
+  - type: worker
+    name: tree-recycle-worker
+    runtime: ruby
+    plan: free
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec rake jobs:work"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tree-recycle-db
+          property: connectionString
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: RAILS_ENV
+        value: production
