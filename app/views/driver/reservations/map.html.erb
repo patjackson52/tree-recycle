@@ -24,7 +24,9 @@
 <%- end %>
 </div>
 
-<div id="map"></div>
+<div id="map"
+     data-controller="map-state"
+     data-map-state-key-value="driver_<%= @route&.id || @zone&.id || @reservation&.id || 'all' %>"></div>
 <script async src="https://maps.googleapis.com/maps/api/js?key=<%= Rails.application.credentials.google_maps.api_key %>&callback=initMap&libraries=marker&v=beta"></script>
 <script>
 

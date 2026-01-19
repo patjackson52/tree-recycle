@@ -23,7 +23,9 @@
     </div>
   </div>
 
-  <div id="map"></div>
+  <div id="map"
+       data-controller="map-state"
+       data-map-state-key-value="admin_<%= @route&.id || @zone&.id || 'all' %>"></div>
   <script async src="https://maps.googleapis.com/maps/api/js?key=<%= Rails.application.credentials.google_maps.api_key %>&callback=initMap&libraries=marker&v=beta"></script>
 
   <script>
@@ -77,7 +79,7 @@
                 `<div class='status-info'><div class='status'>${locations[i][5]}</div>` +
                   `<div class='buttons'>` +
                     `<a type="button" data-turbo-method="patch" data-method="patch" data-turbo-confirm="Picked up? Are you sure?" class='btn btn-outline-success btn-sm' href='/admin/reservations/${locations[i][0]}?status=picked_up&view=map'>Picked Up</a> ` +
-                    `<a type="button" data-turbo-method="patch" data-method="patch" data-turbo-confirm="Missing? Are you sure? This will trigger an SMS message to the resident asking them to contact us." class='btn btn-outline-danger btn-sm' href='/driver/reservations/${locations[i][0]}?status=missing&view=map'>Missing</a>` +
+                    `<a type="button" data-turbo-method="patch" data-method="patch" data-turbo-confirm="Missing? Are you sure? This will trigger an SMS message to the resident asking them to contact us." class='btn btn-outline-danger btn-sm' href='/admin/reservations/${locations[i][0]}?status=missing&view=map'>Missing</a>` +
                   `</div>` +
                 `</div>`+
                 
