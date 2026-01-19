@@ -37,3 +37,8 @@ var map = new google.maps.Map(
 if (window.mapStateController) {
   window.mapStateController.setupMapListeners(map);
 }
+
+// Setup user location tracking
+if (window.userLocationController) {
+  window.userLocationController.setupLocationTracking(map);
+}
