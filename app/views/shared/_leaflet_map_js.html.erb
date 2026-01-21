@@ -1,0 +1,101 @@
+// Determine default map settings
+var defaultZoom, defaultCenter;
+<%- if @route %>
+  defaultZoom = 15;
+  defaultCenter = [<%= @route.latitude %>, <%= @route.longitude %>];
+<%- elsif @reservation %>
+  defaultZoom = 19;
+  defaultCenter = [<%= @reservation.latitude %>, <%= @reservation.longitude %>];
+<%- elsif @zone %>
+  defaultZoom = 13;
+  defaultCenter = [<%= @zone.latitude %>, <%= @zone.longitude %>];
+<%- else %>
+  defaultZoom = 12;
+  defaultCenter = [47.64483, -122.54827];
+<%- end %>
+
+// Check for saved state from Stimulus controller
+var savedState = null;
+if (window.mapStateController) {
+  savedState = window.mapStateController.getSavedState();
+}
+
+// Use saved state if available, otherwise use defaults
+var mapZoom = savedState ? savedState.zoom : defaultZoom;
+var mapCenter = savedState ? [savedState.center.lat, savedState.center.lng] : defaultCenter;
+
+// Create the Leaflet map
+var map = L.map('map', {
+  center: mapCenter,
+  zoom: mapZoom,
+  zoomControl: true
+});
+
+// Add OpenStreetMap tile layer
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19,
+  minZoom: 3
+}).addTo(map);
+
+// Add Google Maps API compatibility shims for map_state_controller
+// This allows the existing map_state_controller to work with Leaflet
+if (!map.addListener) {
+  map.addListener = function(event, callback) {
+    // Map Google Maps events to Leaflet events
+    const eventMap = {
+      'idle': 'moveend',
+      'zoom_changed': 'zoomend',
+      'center_changed': 'moveend',
+      'bounds_changed': 'moveend',
+      'click': 'click',
+      'dblclick': 'dblclick'
+    };
+
+    const leafletEvent = eventMap[event] || event;
+    this.on(leafletEvent, callback);
+  };
+}
+
+// Override getCenter to return Google Maps-compatible object
+// Google Maps returns object with lat() and lng() methods
+// Leaflet returns object with lat and lng properties
+const originalGetCenter = map.getCenter.bind(map);
+map.getCenter = function() {
+  const center = originalGetCenter();
+  return {
+    lat: () => center.lat,
+    lng: () => center.lng,
+    _leafletLatLng: center // Keep original for internal Leaflet operations
+  };
+};
+
+// Add setCenter compatibility for controllers that use Google Maps style
+const originalSetCenter = map.setCenter ? map.setCenter.bind(map) : map.panTo.bind(map);
+map.setCenter = function(latLng) {
+  // Handle both Google Maps LatLng objects and Leaflet [lat, lng] arrays
+  if (latLng && typeof latLng.lat === 'function') {
+    // Google Maps style LatLng object
+    originalSetCenter([latLng.lat(), latLng.lng()]);
+  } else if (latLng && latLng._leafletLatLng) {
+    // Our compatibility object
+    originalSetCenter(latLng._leafletLatLng);
+  } else {
+    // Already in Leaflet format
+    originalSetCenter(latLng);
+  }
+};
+
+// Store map reference globally for compatibility
+window.currentMap = map;
+
+// Setup listeners to save state when map changes
+if (window.mapStateController) {
+  window.mapStateController.setupMapListeners(map);
+}
+
+// Setup user location tracking
+// The user_location_controller now supports both Google Maps and Leaflet
+if (window.userLocationController) {
+  window.userLocationController.setupLocationTracking(map);
+}

@@ -1,3 +1,12 @@
+<%# Include Leaflet CSS and JS if using Leaflet %>
+<%- if MapService.use_leaflet? %>
+  <%= render 'shared/leaflet_head' %>
+  <!-- Leaflet JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+<%- end %>
+
 <div class='container'>
 <div class='text-center mb-2'>
 <%- if @route %>
@@ -37,75 +46,91 @@
     </button>
   </div>
 </div>
-<script async src="https://maps.googleapis.com/maps/api/js?key=<%= Rails.application.credentials.google_maps.api_key %>&callback=initMap&libraries=marker&v=beta"></script>
-<script>
 
-  // Initialize and add the map
-  var map;
-  function initMap() {
+<%- if MapService.use_google_maps? %>
+  <%# Google Maps implementation %>
+  <script async src="https://maps.googleapis.com/maps/api/js?key=<%= Rails.application.credentials.google_maps.api_key %>&callback=initMap&libraries=marker&v=beta"></script>
+  <script>
 
-    // reservations = [[id, street, lat, lon, notes, status, phone, donation, collected, collected_amount, name, route, zone_name, admin_notes]]
-    let locations =  <%= raw @reservations %>;
+    // Initialize and add the map
+    var map;
+    function initMap() {
 
-    <%= render 'shared/map_js' %>
+      // reservations = [[id, street, lat, lon, notes, status, phone, donation, collected, collected_amount, name, route, zone_name, admin_notes]]
+      let locations =  <%= raw @reservations %>;
 
-    var infowindow = new google.maps.InfoWindow();
+      <%= render 'shared/map_js' %>
 
-    for (i = 0; i < locations.length; i++) {
+      var infowindow = new google.maps.InfoWindow();
 
-      <%= render 'shared/pin_colors_js' %>
+      for (i = 0; i < locations.length; i++) {
 
-      const marker = new google.maps.marker.AdvancedMarkerView({
-        map,
-        position: { lat: locations[i][2], lng: locations[i][3] },
-        title: locations[i][1],
-        map: map,
-        content: locations[i][5]=='Pending pickup' ? pinViewBackgroundPending.element : locations[i][5]=='Missing' ? pinViewBackgroundMissing.element : locations[i][5]== 'Picked up' ? pinViewBackgroundPickedUp.element : pinViewBackgroundArchived.element
-      });
+        <%= render 'shared/pin_colors_js' %>
 
-      let html_content = 
+        const marker = new google.maps.marker.AdvancedMarkerView({
+          map,
+          position: { lat: locations[i][2], lng: locations[i][3] },
+          title: locations[i][1],
+          map: map,
+          content: locations[i][5]=='Pending pickup' ? pinViewBackgroundPending.element : locations[i][5]=='Missing' ? pinViewBackgroundMissing.element : locations[i][5]== 'Picked up' ? pinViewBackgroundPickedUp.element : pinViewBackgroundArchived.element
+        });
+
+        let html_content = buildInfoWindowContent(locations[i]);
+
+        google.maps.event.addListener(marker, 'click', (function (marker, i) {
+          return function () {
+            infowindow.setContent(html_content);
+            infowindow.open(map, marker);
+          }
+        })(marker, i));
+      }
+    }
+
+    // Shared function to build info window/popup content
+    function buildInfoWindowContent(location) {
+      let html_content =
             `<div class='map-info-window'>` +
               `<div class='header'>` +
-                `<a class='street' href='/driver/reservations/${locations[i][0]}'>${locations[i][1]}</a>`+
+                `<a class='street' href='/driver/reservations/${location[0]}'>${location[1]}</a>`+
                 `<div class='map-links'>`+
-                  `<a href="https://maps.apple.com/?q=${locations[i][2]},${ locations[i][3]}" target='_blank' class= 'map-link'><i class='bi bi-apple'></i></a>` +
-                  `<a href="https://www.google.com/maps/place/${locations[i][2]},${ locations[i][3]}", target='_blank' class='map-link'><i class='bi bi-google'></i></a>` +
+                  `<a href="https://maps.apple.com/?q=${location[2]},${location[3]}" target='_blank' class= 'map-link'><i class='bi bi-apple'></i></a>` +
+                  `<a href="https://www.google.com/maps/place/${location[2]},${location[3]}", target='_blank' class='map-link'><i class='bi bi-google'></i></a>` +
                 `</div>` +
-              `</div>` 
+              `</div>`
       html_content +=
               `<div class='status-info'>` +
                 `<div class='buttons'>` +
-                  `<a type="button" disabled=true data-turbo-method="patch" data-method="patch" data-turbo-confirm="Change back to Pending?" class='btn btn-outline-danger btn-sm ${locations[i][5]=="Pending pickup" ? "selected" : "" }' href='/driver/reservations/${locations[i][0]}?status=pending_pickup&view=map'>Pick-up</a>` +
-                  `<a type="button" data-turbo-method="patch" data-method="patch" data-turbo-confirm="Picked up? Are you sure?" class='btn btn-outline-danger btn-sm ${locations[i][5]=="Picked up" ? "selected" : "" }' href='/driver/reservations/${locations[i][0]}?status=picked_up&view=map'>Picked</a> ` +
-                  `<a type="button" data-turbo-method="patch" data-method="patch" data-turbo-confirm="Missing? Are you sure? This will trigger an SMS message to the resident asking them to contact us." class='btn btn-outline-danger btn-sm ${locations[i][5]=="Missing" ? "selected" : "" }' href='/driver/reservations/${locations[i][0]}?status=missing&view=map'>Missing</a>` +
+                  `<a type="button" disabled=true data-turbo-method="patch" data-method="patch" data-turbo-confirm="Change back to Pending?" class='btn btn-outline-danger btn-sm ${location[5]=="Pending pickup" ? "selected" : "" }' href='/driver/reservations/${location[0]}?status=pending_pickup&view=map'>Pick-up</a>` +
+                  `<a type="button" data-turbo-method="patch" data-method="patch" data-turbo-confirm="Picked up? Are you sure?" class='btn btn-outline-danger btn-sm ${location[5]=="Picked up" ? "selected" : "" }' href='/driver/reservations/${location[0]}?status=picked_up&view=map'>Picked</a> ` +
+                  `<a type="button" data-turbo-method="patch" data-method="patch" data-turbo-confirm="Missing? Are you sure? This will trigger an SMS message to the resident asking them to contact us." class='btn btn-outline-danger btn-sm ${location[5]=="Missing" ? "selected" : "" }' href='/driver/reservations/${location[0]}?status=missing&view=map'>Missing</a>` +
                 `</div>` +
               `</div>`+
-              
-              `<div class='name'>${locations[i][10]}${locations[i][6] ? " / " + locations[i][6] : ""}</div>`
+
+              `<div class='name'>${location[10]}${location[6] ? " / " + location[6] : ""}</div>`
       html_content +=
-            `<div class='notes'>${locations[i][4]}</div>`+
-            `<div class='admin_notes'>${locations[i][13]=="" ? "" : "Admin: " + locations[i][13]}</div>`
+            `<div class='notes'>${location[4]}</div>`+
+            `<div class='admin_notes'>${location[13]=="" ? "" : "Admin: " + location[13]}</div>`
       html_content +=
             `<div class='donation-info'>`+
               `<div class='donation-status'>` +
-                `<div class='badge bg-primary'>Donation: ${locations[i][7]=='online_donation' ? "Online Donation" : 
-                  locations[i][7]=='cash_or_check_donation' ? "Cash/Check donation" : locations[i][7]=='no_donation' ? "No Donation" : "No Selection" } </div>` +
+                `<div class='badge bg-primary'>Donation: ${location[7]=='online_donation' ? "Online Donation" :
+                  location[7]=='cash_or_check_donation' ? "Cash/Check donation" : location[7]=='no_donation' ? "No Donation" : "No Selection" } </div>` +
               `</div>` +
             `</div>`
-      if (locations[i][7] != 'online_donation'){
+      if (location[7] != 'online_donation'){
         html_content +=
             `<div class='actions'>` +
-              `<form action='/driver/reservations/${locations[i][0]}' method="patch" data-turbo-method="patch" data-method='patch'>` +
+              `<form action='/driver/reservations/${location[0]}' method="patch" data-turbo-method="patch" data-method='patch'>` +
                 `<div class='checkboxes'><div class='choose'>Choose one:</div>` +
 
                 `<label>Doorhanger</label>` +
-                `<input type="radio" name="collected" id="collected_door_hanger" value="door_hanger" ${locations[i][8]=="door_hanger" ? "checked" : "" }>` +
+                `<input type="radio" name="collected" id="collected_door_hanger" value="door_hanger" ${location[8]=="door_hanger" ? "checked" : "" }>` +
                 `<label>Cash collected</label>` +
-                `<input type="radio" name="collected" id="collected_cash" value="cash" ${locations[i][8]=="cash" ? "checked" : "" }>` +
+                `<input type="radio" name="collected" id="collected_cash" value="cash" ${location[8]=="cash" ? "checked" : "" }>` +
                 `<label>Check collected</label>` +
-                `<input type="radio" name="collected" id="collected_check" value="check" ${locations[i][8]=="check" ? "checked" : "" }>` +
+                `<input type="radio" name="collected" id="collected_check" value="check" ${location[8]=="check" ? "checked" : "" }>` +
                 `</br>` +
-                `<input type="number" name="collected_amount" placeholder="Cash or check amount" step="0.01" value=${locations[i][9]}>`+
+                `<input type="number" name="collected_amount" placeholder="Cash or check amount" step="0.01" value=${location[9]}>`+
                 `<input type="hidden" name="view" value="map" />` +
                 `<input type="submit" value="Submit">` +
               `</form>`+
@@ -114,14 +139,136 @@
 
       html_content += `</div>`
 
-      google.maps.event.addListener(marker, 'click', (function (marker, i) {
-        return function () {
-          infowindow.setContent(html_content);
-          infowindow.open(map, marker);
-        }
-      })(marker, i));
+      return html_content;
     }
-  }
 
-</script>
+  </script>
+<%- else %>
+  <%# Leaflet.js implementation %>
+  <script>
+    // Initialize and add the map
+    var map;
+
+    // reservations = [[id, street, lat, lon, notes, status, phone, donation, collected, collected_amount, name, route, zone_name, admin_notes]]
+    let locations =  <%= raw @reservations %>;
+
+    <%= render 'shared/leaflet_map_js' %>
+
+    // Shared function to build info window/popup content
+    function buildInfoWindowContent(location) {
+      let html_content =
+            `<div class='map-info-window'>` +
+              `<div class='header'>` +
+                `<a class='street' href='/driver/reservations/${location[0]}'>${location[1]}</a>`+
+                `<div class='map-links'>`+
+                  `<a href="https://maps.apple.com/?q=${location[2]},${location[3]}" target='_blank' class= 'map-link'><i class='bi bi-apple'></i></a>` +
+                  `<a href="https://www.google.com/maps/place/${location[2]},${location[3]}", target='_blank' class='map-link'><i class='bi bi-google'></i></a>` +
+                `</div>` +
+              `</div>`
+      html_content +=
+              `<div class='status-info'>` +
+                `<div class='buttons'>` +
+                  `<a type="button" disabled=true data-turbo-method="patch" data-method="patch" data-turbo-confirm="Change back to Pending?" class='btn btn-outline-danger btn-sm ${location[5]=="Pending pickup" ? "selected" : "" }' href='/driver/reservations/${location[0]}?status=pending_pickup&view=map'>Pick-up</a>` +
+                  `<a type="button" data-turbo-method="patch" data-method="patch" data-turbo-confirm="Picked up? Are you sure?" class='btn btn-outline-danger btn-sm ${location[5]=="Picked up" ? "selected" : "" }' href='/driver/reservations/${location[0]}?status=picked_up&view=map'>Picked</a> ` +
+                  `<a type="button" data-turbo-method="patch" data-method="patch" data-turbo-confirm="Missing? Are you sure? This will trigger an SMS message to the resident asking them to contact us." class='btn btn-outline-danger btn-sm ${location[5]=="Missing" ? "selected" : "" }' href='/driver/reservations/${location[0]}?status=missing&view=map'>Missing</a>` +
+                `</div>` +
+              `</div>`+
+
+              `<div class='name'>${location[10]}${location[6] ? " / " + location[6] : ""}</div>`
+      html_content +=
+            `<div class='notes'>${location[4]}</div>`+
+            `<div class='admin_notes'>${location[13]=="" ? "" : "Admin: " + location[13]}</div>`
+      html_content +=
+            `<div class='donation-info'>`+
+              `<div class='donation-status'>` +
+                `<div class='badge bg-primary'>Donation: ${location[7]=='online_donation' ? "Online Donation" :
+                  location[7]=='cash_or_check_donation' ? "Cash/Check donation" : location[7]=='no_donation' ? "No Donation" : "No Selection" } </div>` +
+              `</div>` +
+            `</div>`
+      if (location[7] != 'online_donation'){
+        html_content +=
+            `<div class='actions'>` +
+              `<form action='/driver/reservations/${location[0]}' method="patch" data-turbo-method="patch" data-method='patch'>` +
+                `<div class='checkboxes'><div class='choose'>Choose one:</div>` +
+
+                `<label>Doorhanger</label>` +
+                `<input type="radio" name="collected" id="collected_door_hanger" value="door_hanger" ${location[8]=="door_hanger" ? "checked" : "" }>` +
+                `<label>Cash collected</label>` +
+                `<input type="radio" name="collected" id="collected_cash" value="cash" ${location[8]=="cash" ? "checked" : "" }>` +
+                `<label>Check collected</label>` +
+                `<input type="radio" name="collected" id="collected_check" value="check" ${location[8]=="check" ? "checked" : "" }>` +
+                `</br>` +
+                `<input type="number" name="collected_amount" placeholder="Cash or check amount" step="0.01" value=${location[9]}>`+
+                `<input type="hidden" name="view" value="map" />` +
+                `<input type="submit" value="Submit">` +
+              `</form>`+
+            `</div>`
+        }
+
+      html_content += `</div>`
+
+      return html_content;
+    }
+
+    // Create custom colored pin icons for Leaflet
+    function getMarkerIcon(status) {
+      // Color scheme matching Google Maps pins
+      const colors = {
+        'Pending pickup': '#003F87',
+        'Missing': '#CE1126',
+        'Picked up': '#efefef',
+        'default': '#aaaaaa'
+      };
+
+      const color = colors[status] || colors['default'];
+      const textColor = (status === 'Picked up' || status === 'default') ? '#000000' : '#ffffff';
+
+      // Create custom HTML for the marker
+      const markerHtml = `
+        <div style="
+          background-color: ${color};
+          width: 30px;
+          height: 30px;
+          border-radius: 50% 50% 50% 0;
+          transform: rotate(-45deg);
+          border: 2px solid white;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        ">
+          <div style="
+            transform: rotate(45deg);
+            color: ${textColor};
+            font-size: 16px;
+            text-align: center;
+            margin-top: 5px;
+          ">📍</div>
+        </div>
+      `;
+
+      return L.divIcon({
+        html: markerHtml,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42],
+        popupAnchor: [0, -42],
+        className: 'custom-leaflet-marker'
+      });
+    }
+
+    // Create markers for each location
+    for (let i = 0; i < locations.length; i++) {
+      const location = locations[i];
+      const marker = L.marker([location[2], location[3]], {
+        icon: getMarkerIcon(location[5]),
+        title: location[1]
+      }).addTo(map);
+
+      // Build and bind popup content
+      const popupContent = buildInfoWindowContent(location);
+      marker.bindPopup(popupContent, {
+        maxWidth: 350,
+        minWidth: 250
+      });
+    }
+
+  </script>
+<%- end %>
 </div>

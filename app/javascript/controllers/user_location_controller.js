@@ -16,6 +16,13 @@ export default class extends Controller {
     this.watchId = null
     this.currentPosition = null
     this.currentHeading = null
+    this.isLeaflet = false
+  }
+
+  // Detect which map library is being used
+  _detectMapLibrary(map) {
+    // Leaflet maps have _leaflet_id property
+    return map && (map._leaflet_id !== undefined || (typeof L !== 'undefined' && map instanceof L.Map))
   }
 
   disconnect() {
@@ -30,6 +37,7 @@ export default class extends Controller {
     }
 
     this.map = map
+    this.isLeaflet = this._detectMapLibrary(map)
 
     // Check if geolocation is supported
     if (!navigator.geolocation) {
@@ -70,20 +78,37 @@ export default class extends Controller {
       window.removeEventListener('deviceorientation', this.orientationHandler)
     }
 
-    // Remove markers
+    // Remove markers - handle both Google Maps and Leaflet
     if (this.userMarker) {
-      this.userMarker.setMap(null)
+      if (this.isLeaflet) {
+        this.map.removeLayer(this.userMarker)
+      } else {
+        this.userMarker.setMap(null)
+      }
       this.userMarker = null
     }
 
     if (this.userCircle) {
-      this.userCircle.setMap(null)
+      if (this.isLeaflet) {
+        this.map.removeLayer(this.userCircle)
+      } else {
+        this.userCircle.setMap(null)
+      }
       this.userCircle = null
     }
 
     if (this.headingLine) {
-      this.headingLine.setMap(null)
+      if (this.isLeaflet) {
+        this.map.removeLayer(this.headingLine)
+      } else {
+        this.headingLine.setMap(null)
+      }
       this.headingLine = null
+    }
+
+    if (this.headingArrow && this.isLeaflet) {
+      this.map.removeLayer(this.headingArrow)
+      this.headingArrow = null
     }
   }
 
@@ -100,7 +125,11 @@ export default class extends Controller {
 
     // Center map on user location if enabled
     if (this.centerOnLocationValue) {
-      this.map.setCenter(new google.maps.LatLng(lat, lng))
+      if (this.isLeaflet) {
+        this.map.setCenter([lat, lng])
+      } else {
+        this.map.setCenter(new google.maps.LatLng(lat, lng))
+      }
       // Only center once, then disable
       this.centerOnLocationValue = false
     }
@@ -123,6 +152,14 @@ export default class extends Controller {
   }
 
   updateUserMarker(lat, lng, accuracy, heading) {
+    if (this.isLeaflet) {
+      this._updateUserMarkerLeaflet(lat, lng, accuracy, heading)
+    } else {
+      this._updateUserMarkerGoogleMaps(lat, lng, accuracy, heading)
+    }
+  }
+
+  _updateUserMarkerGoogleMaps(lat, lng, accuracy, heading) {
     const position = new google.maps.LatLng(lat, lng)
 
     // Create or update accuracy circle (blue circle around user position)
@@ -173,7 +210,65 @@ export default class extends Controller {
     }
   }
 
+  _updateUserMarkerLeaflet(lat, lng, accuracy, heading) {
+    const position = [lat, lng]
+
+    // Create or update accuracy circle (blue circle around user position)
+    if (!this.userCircle) {
+      this.userCircle = L.circle(position, {
+        color: '#4285F4',
+        opacity: 0.3,
+        weight: 1,
+        fillColor: '#4285F4',
+        fillOpacity: 0.1,
+        radius: accuracy
+      }).addTo(this.map)
+    } else {
+      this.userCircle.setLatLng(position)
+      this.userCircle.setRadius(accuracy)
+    }
+
+    // Create or update user position marker (blue dot)
+    if (!this.userMarker) {
+      // Create a custom blue dot marker using divIcon
+      const markerElement = L.divIcon({
+        className: 'user-location-marker',
+        html: `
+          <div class="user-dot">
+            <div class="user-dot-inner"></div>
+          </div>
+        `,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+      })
+
+      this.userMarker = L.marker(position, {
+        icon: markerElement,
+        title: 'Your Location',
+        zIndexOffset: 1000
+      }).addTo(this.map)
+    } else {
+      this.userMarker.setLatLng(position)
+    }
+
+    // Update heading indicator if heading is available
+    if (heading !== null && heading !== undefined && !isNaN(heading)) {
+      this.updateHeadingIndicator(lat, lng, heading)
+    } else if (this.currentHeading !== null) {
+      // Use device orientation heading if GPS heading not available
+      this.updateHeadingIndicator(lat, lng, this.currentHeading)
+    }
+  }
+
   updateHeadingIndicator(lat, lng, heading) {
+    if (this.isLeaflet) {
+      this._updateHeadingIndicatorLeaflet(lat, lng, heading)
+    } else {
+      this._updateHeadingIndicatorGoogleMaps(lat, lng, heading)
+    }
+  }
+
+  _updateHeadingIndicatorGoogleMaps(lat, lng, heading) {
     // Calculate endpoint for heading line (50 meters in direction of heading)
     const headingEndpoint = this.calculateDestination(lat, lng, heading, 50)
 
@@ -206,6 +301,68 @@ export default class extends Controller {
         { lat, lng },
         headingEndpoint
       ])
+    }
+  }
+
+  _updateHeadingIndicatorLeaflet(lat, lng, heading) {
+    // Calculate endpoint for heading line (50 meters in direction of heading)
+    const headingEndpoint = this.calculateDestination(lat, lng, heading, 50)
+
+    if (!this.headingLine) {
+      this.headingLine = L.polyline([
+        [lat, lng],
+        [headingEndpoint.lat, headingEndpoint.lng]
+      ], {
+        color: '#4285F4',
+        opacity: 0.8,
+        weight: 3
+      }).addTo(this.map)
+
+      // Add arrowhead using a custom div marker at the end point
+      this._createHeadingArrow(headingEndpoint.lat, headingEndpoint.lng, heading)
+    } else {
+      this.headingLine.setLatLngs([
+        [lat, lng],
+        [headingEndpoint.lat, headingEndpoint.lng]
+      ])
+
+      // Update arrow position
+      if (this.headingArrow) {
+        this.headingArrow.setLatLng([headingEndpoint.lat, headingEndpoint.lng])
+        this.headingArrow.setRotationAngle(heading)
+      } else {
+        this._createHeadingArrow(headingEndpoint.lat, headingEndpoint.lng, heading)
+      }
+    }
+  }
+
+  _createHeadingArrow(lat, lng, heading) {
+    // Create a custom arrow marker for Leaflet
+    const arrowIcon = L.divIcon({
+      className: 'heading-arrow-icon',
+      html: `
+        <svg width="20" height="20" viewBox="0 0 20 20" style="transform: rotate(${heading}deg);">
+          <path d="M10 0 L15 10 L10 8 L5 10 Z" fill="#4285F4" stroke="#FFFFFF" stroke-width="1"/>
+        </svg>
+      `,
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    })
+
+    this.headingArrow = L.marker([lat, lng], {
+      icon: arrowIcon,
+      zIndexOffset: 999
+    }).addTo(this.map)
+
+    // Store rotation angle for updates
+    this.headingArrow.setRotationAngle = (angle) => {
+      const iconDiv = this.headingArrow.getElement()
+      if (iconDiv) {
+        const svg = iconDiv.querySelector('svg')
+        if (svg) {
+          svg.style.transform = `rotate(${angle}deg)`
+        }
+      }
     }
   }
 
@@ -290,11 +447,15 @@ export default class extends Controller {
   // Action to center map on user's current location
   centerOnUser() {
     if (this.currentPosition) {
-      this.map.setCenter(new google.maps.LatLng(
-        this.currentPosition.lat,
-        this.currentPosition.lng
-      ))
-      this.map.setZoom(18) // Zoom in when centering on user
+      if (this.isLeaflet) {
+        this.map.setView([this.currentPosition.lat, this.currentPosition.lng], 18)
+      } else {
+        this.map.setCenter(new google.maps.LatLng(
+          this.currentPosition.lat,
+          this.currentPosition.lng
+        ))
+        this.map.setZoom(18) // Zoom in when centering on user
+      }
     } else {
       console.warn('User location not yet available')
     }
