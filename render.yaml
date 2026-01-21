@@ -46,6 +46,18 @@ services:
         sync: false
       - key: REDIS_URL
         sync: false
+      - key: FAKE_SERVICES_ENABLED
+        value: true
+      - key: FAKE_MAPS
+        value: true
+      - key: FAKE_GEOCODER
+        value: true
+      - key: FAKE_STRIPE
+        value: true
+      - key: FAKE_TWILIO
+        value: true
+      - key: FAKE_USPS
+        value: true
 
   - type: worker
     name: tree-recycle-worker
@@ -62,3 +74,15 @@ services:
         sync: false
       - key: RAILS_ENV
         value: production
+      - key: FAKE_SERVICES_ENABLED
+        value: true
+      - key: FAKE_MAPS
+        value: true
+      - key: FAKE_GEOCODER
+        value: true
+      - key: FAKE_STRIPE
+        value: true
+      - key: FAKE_TWILIO
+        value: true
+      - key: FAKE_USPS
+        value: true
