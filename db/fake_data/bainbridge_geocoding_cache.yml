@@ -1,0 +1,208 @@
+# Geocoding cache for Bainbridge Island addresses
+# This file contains pre-geocoded addresses to enable development without AWS Location Service
+#
+# Format: Address key => coordinates and metadata
+# Keys are normalized to lowercase for consistent matching
+#
+# To populate this cache with real coordinates, run:
+#   rake fake_services:generate_geocoding_cache
+#
+# This will use real AWS Location Service to geocode all addresses from seeds.rb
+# and save them here for future fake service usage.
+
+# Zone addresses (4 zones)
+"7729 finch rd ne, bainbridge island, wa":
+  coordinates: [47.6426, -122.5213]
+  address: "7729 Finch Rd NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "7729 Finch Rd NE, Bainbridge Island, WA 98110, USA"
+
+"5685 ne wild cherry ln, bainbridge island, wa":
+  coordinates: [47.6559, -122.5468]
+  address: "5685 NE Wild Cherry Ln"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "5685 NE Wild Cherry Ln, Bainbridge Island, WA 98110, USA"
+
+"8792 ne oddfellows rd, bainbridge island, wa":
+  coordinates: [47.6063, -122.5304]
+  address: "8792 NE Oddfellows Rd"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "8792 NE Oddfellows Rd, Bainbridge Island, WA 98110, USA"
+
+"10215 manitou beach dr ne, bainbridge island, wa":
+  coordinates: [47.6758, -122.4829]
+  address: "10215 Manitou Beach Dr NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "10215 Manitou Beach Dr NE, Bainbridge Island, WA 98110, USA"
+
+# Route addresses (sample)
+"9091 olympus beach rd ne, bainbridge island, wa":
+  coordinates: [47.6745, -122.5103]
+  address: "9091 Olympus Beach Rd NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "9091 Olympus Beach Rd NE, Bainbridge Island, WA 98110, USA"
+
+"215 ericksen ave ne, bainbridge island, wa":
+  coordinates: [47.62596, -122.51753]
+  address: "215 Ericksen Ave NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "215 Ericksen Ave NE, Bainbridge Island, WA 98110, USA"
+
+# Street addresses (representative sample - 20 addresses)
+"1760 susan place, bainbridge island, wa":
+  coordinates: [47.6312, -122.5145]
+  address: "1760 Susan Place"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "1760 Susan Place, Bainbridge Island, WA 98110, USA"
+
+"14265 silven ave ne, bainbridge island, wa":
+  coordinates: [47.6891, -122.4782]
+  address: "14265 Silven Ave NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "14265 Silven Ave NE, Bainbridge Island, WA 98110, USA"
+
+"2250 upper farms rd ne, bainbridge island, wa":
+  coordinates: [47.6389, -122.5087]
+  address: "2250 Upper Farms Rd NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "2250 Upper Farms Rd NE, Bainbridge Island, WA 98110, USA"
+
+"4178 el cimo ln ne, bainbridge island, wa":
+  coordinates: [47.6478, -122.5234]
+  address: "4178 El Cimo Ln NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "4178 El Cimo Ln NE, Bainbridge Island, WA 98110, USA"
+
+"7501 ne west port madison rd, bainbridge island, wa":
+  coordinates: [47.6621, -122.5389]
+  address: "7501 NE West Port Madison Rd"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "7501 NE West Port Madison Rd, Bainbridge Island, WA 98110, USA"
+
+"786 fairview ave ne, bainbridge island, wa":
+  coordinates: [47.6234, -122.5167]
+  address: "786 Fairview Ave NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "786 Fairview Ave NE, Bainbridge Island, WA 98110, USA"
+
+"4932 mcdonald ave ne, bainbridge island, wa":
+  coordinates: [47.6523, -122.5267]
+  address: "4932 McDonald Ave NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "4932 McDonald Ave NE, Bainbridge Island, WA 98110, USA"
+
+"8023 ne hidden cove rd, bainbridge island, wa":
+  coordinates: [47.6678, -122.5321]
+  address: "8023 NE Hidden Cove Rd"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "8023 NE Hidden Cove Rd, Bainbridge Island, WA 98110, USA"
+
+"14100 n madison ave ne, bainbridge island, wa":
+  coordinates: [47.6867, -122.4798]
+  address: "14100 N Madison Ave NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "14100 N Madison Ave NE, Bainbridge Island, WA 98110, USA"
+
+"9733 ne sunny hill cir, bainbridge island, wa":
+  coordinates: [47.6756, -122.5012]
+  address: "9733 NE Sunny Hill Cir"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "9733 NE Sunny Hill Cir, Bainbridge Island, WA 98110, USA"
+
+"6619 crystal springs dr ne, bainbridge island, wa":
+  coordinates: [47.6587, -122.5401]
+  address: "6619 Crystal Springs Dr NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "6619 Crystal Springs Dr NE, Bainbridge Island, WA 98110, USA"
+
+"3083 point white dr ne, bainbridge island, wa":
+  coordinates: [47.6112, -122.4973]
+  address: "3083 Point White Dr NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "3083 Point White Dr NE, Bainbridge Island, WA 98110, USA"
+
+"9596 green spot pl ne, bainbridge island, wa":
+  coordinates: [47.6734, -122.5087]
+  address: "9596 Green Spot Pl NE"
+  city: "Bainbridge Island"
+  state: "Washington"
+  state_code: "WA"
+  country: "United States"
+  country_code: "US"
+  formatted_address: "9596 Green Spot Pl NE, Bainbridge Island, WA 98110, USA"
+
+# Note: This is a starter set of 15 addresses
+# Run 'rake fake_services:generate_geocoding_cache' to populate all 93 addresses
+# from seeds.rb with real coordinates from AWS Location Service
