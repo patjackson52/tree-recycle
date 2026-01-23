@@ -446,18 +446,52 @@ export default class extends Controller {
 
   // Action to center map on user's current location
   centerOnUser() {
+    // If we don't have a map reference yet, grab it from the global
+    if (!this.map && window.currentMap) {
+      this.setupLocationTracking(window.currentMap)
+    }
+
     if (this.currentPosition) {
-      if (this.isLeaflet) {
-        this.map.setView([this.currentPosition.lat, this.currentPosition.lng], 18)
-      } else {
-        this.map.setCenter(new google.maps.LatLng(
-          this.currentPosition.lat,
-          this.currentPosition.lng
-        ))
-        this.map.setZoom(18) // Zoom in when centering on user
-      }
+      this._centerMapOnPosition(this.currentPosition.lat, this.currentPosition.lng)
     } else {
-      console.warn('User location not yet available')
+      // Request location now if not already tracking
+      if (!navigator.geolocation) {
+        alert('Geolocation is not supported by this browser.')
+        return
+      }
+
+      // Start tracking if not already
+      if (!this.watchId && this.map) {
+        this.startTracking()
+      }
+
+      // Also do a one-shot request for immediate centering
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude
+          const lng = position.coords.longitude
+          this.currentPosition = { lat, lng }
+          this._centerMapOnPosition(lat, lng)
+          this.updateUserMarker(lat, lng, position.coords.accuracy, position.coords.heading)
+        },
+        (error) => {
+          if (error.code === error.PERMISSION_DENIED) {
+            alert('Location access denied. Please enable location permissions in your browser settings.')
+          } else {
+            alert('Unable to get your location. Please try again.')
+          }
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      )
+    }
+  }
+
+  _centerMapOnPosition(lat, lng) {
+    if (this.isLeaflet) {
+      this.map.setView([lat, lng], 16)
+    } else {
+      this.map.setCenter(new google.maps.LatLng(lat, lng))
+      this.map.setZoom(16)
     }
   }
 
