@@ -1,0 +1,44 @@
+<%# Leaflet.js CSS and JavaScript includes %>
+<%# This partial is used when MapService.use_leaflet? is true %>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""/>
+
+<!-- Leaflet CSS overrides for better integration -->
+<style>
+  /* Ensure Leaflet map fills container */
+  #map {
+    height: 600px;
+    width: 100%;
+    position: relative;
+  }
+
+  /* Fix z-index issues with Leaflet controls */
+  .leaflet-top,
+  .leaflet-bottom {
+    z-index: 900;
+  }
+
+  /* Style Leaflet popups to match Google Maps info windows */
+  .leaflet-popup-content-wrapper {
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  .leaflet-popup-content {
+    margin: 0;
+    min-width: 250px;
+  }
+
+  /* Match our existing map-info-window styles */
+  .leaflet-popup .map-info-window {
+    padding: 10px;
+  }
+
+  /* Fix attribution position to not overlap controls */
+  .leaflet-control-attribution {
+    margin-bottom: 10px;
+  }
+</style>

@@ -1,21 +1,44 @@
-// Create the map, centered at gfg_office
+// Determine default map settings
+var defaultZoom, defaultCenter;
+<%- if @route %>
+  defaultZoom = 15;
+  defaultCenter = new google.maps.LatLng(<%= @route.latitude %>, <%= @route.longitude %>);
+<%- elsif @reservation %>
+  defaultZoom = 19;
+  defaultCenter = new google.maps.LatLng(<%= @reservation.latitude %>, <%= @reservation.longitude %>);
+<%- elsif @zone %>
+  defaultZoom = 13;
+  defaultCenter = new google.maps.LatLng(<%= @zone.latitude %>, <%= @zone.longitude %>);
+<%- else %>
+  defaultZoom = 12;
+  defaultCenter = new google.maps.LatLng(47.64483,-122.54827);
+<%- end %>
+
+// Check for saved state from Stimulus controller
+var savedState = null;
+if (window.mapStateController) {
+  savedState = window.mapStateController.getSavedState();
+}
+
+// Use saved state if available, otherwise use defaults
+var mapZoom = savedState ? savedState.zoom : defaultZoom;
+var mapCenter = savedState ? new google.maps.LatLng(savedState.center.lat, savedState.center.lng) : defaultCenter;
+
+// Create the map
 var map = new google.maps.Map(
         document.getElementById("map"), {
-
-    // Set the zoom of the map
-    <%- if @route %>
-      zoom: 15,
-      center: new google.maps.LatLng(<%= @route.latitude %>, <%= @route.longitude %>),
-    <%- elsif @reservation %>
-      zoom: 19,
-      center: new google.maps.LatLng(<%= @reservation.latitude %>, <%= @reservation.longitude %>),
-    <%- elsif @zone %>
-      zoom: 13,
-      center: new google.maps.LatLng(<%= @zone.latitude %>, <%= @zone.longitude %>),
-    <%- else %>
-      zoom: 12,
-      center: new google.maps.LatLng(47.64483,-122.54827),
-    <%- end %>
+    zoom: mapZoom,
+    center: mapCenter,
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     mapId: "4504f8b37365c3d0"
 });
+
+// Setup listeners to save state when map changes
+if (window.mapStateController) {
+  window.mapStateController.setupMapListeners(map);
+}
+
+// Setup user location tracking
+if (window.userLocationController) {
+  window.userLocationController.setupLocationTracking(map);
+}

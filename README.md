@@ -16,6 +16,49 @@ Our Troop uses this application and it can be viewed at [https://treerecycle.net
 If you have any questions concerning this application, feel free to email me at carson.cole@gmail.com.
 
 
+## Quick Start with Fake Services
+
+Want to try Tree Recycle right away without setting up API keys? The application includes fake services that let you run everything locally for development and testing purposes.
+
+### Get started in 5 minutes
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/tree-recycle.git
+cd tree-recycle
+
+# Copy environment configuration
+cp .env.example .env
+
+# Install dependencies
+bundle install
+
+# Set up the database with seed data
+rails db:setup
+
+# Start the server
+rails server
+```
+
+Visit `http://localhost:3000` and you're ready to go!
+
+### What you get with fake services
+
+- **No API keys required**: Works out of the box without configuring Google Maps, AWS, Twilio, USPS, or email services
+- **Leaflet.js maps**: Uses the free, open-source Leaflet.js library instead of Google Maps
+- **Fake data generation**: Automatic geocoding and address validation using simulated services
+- **Full development workflow**: Create reservations, manage routes, test the driver interface, and more
+
+### What doesn't work
+
+- Email notifications (emails are logged to console instead)
+- SMS notifications (logged to console)
+- Real address validation with USPS
+- Production-grade geocoding (uses simulated coordinates)
+
+For complete details on the fake services architecture and how to switch to production services, see [FAKE_SERVICES_PLAN.md](FAKE_SERVICES_PLAN.md).
+
+
 ## REQUIREMENTS
 
 ### Heroku

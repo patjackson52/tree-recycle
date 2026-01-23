@@ -1,0 +1,106 @@
+// User Location Marker Styles
+.user-location-marker {
+  position: relative;
+  cursor: pointer;
+}
+
+.user-dot {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-dot::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #4285F4;
+  border-radius: 50%;
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  animation: pulse-user-location 2s infinite;
+}
+
+.user-dot-inner {
+  width: 8px;
+  height: 8px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes pulse-user-location {
+  0% {
+    box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(66, 133, 244, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(66, 133, 244, 0);
+  }
+}
+
+// Center on Location Button
+.map-location-controls {
+  position: absolute;
+  right: 10px;
+  bottom: 140px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-center-location {
+  background: #FFFFFF;
+  border: none;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #F5F5F5;
+  }
+
+  &:active {
+    background: #E0E0E0;
+  }
+
+  i {
+    font-size: 20px;
+    color: #666666;
+  }
+
+  &.active i {
+    color: #4285F4;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Map container positioning
+#map {
+  position: relative;
+}
+
+// Leaflet heading arrow icon
+.heading-arrow-icon {
+  background: transparent;
+  border: none;
+}

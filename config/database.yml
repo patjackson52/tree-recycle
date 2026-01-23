@@ -18,3 +18,7 @@ test:
   database: tree-recycle-test
   username: carsoncole
   password: password
+
+production:
+  <<: *default
+  url: <%= ENV['DATABASE_URL'] %>
