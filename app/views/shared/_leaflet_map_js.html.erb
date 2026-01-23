@@ -2,13 +2,13 @@
 var defaultZoom, defaultCenter;
 <%- if @route %>
   defaultZoom = 15;
-  defaultCenter = [<%= @route.latitude %>, <%= @route.longitude %>];
+  defaultCenter = [<%= @route.latitude || 47.64483 %>, <%= @route.longitude || -122.54827 %>];
 <%- elsif @reservation %>
   defaultZoom = 19;
-  defaultCenter = [<%= @reservation.latitude %>, <%= @reservation.longitude %>];
+  defaultCenter = [<%= @reservation.latitude || 47.64483 %>, <%= @reservation.longitude || -122.54827 %>];
 <%- elsif @zone %>
   defaultZoom = 13;
-  defaultCenter = [<%= @zone.latitude %>, <%= @zone.longitude %>];
+  defaultCenter = [<%= @zone.latitude || 47.64483 %>, <%= @zone.longitude || -122.54827 %>];
 <%- else %>
   defaultZoom = 12;
   defaultCenter = [47.64483, -122.54827];
@@ -57,32 +57,12 @@ if (!map.addListener) {
   };
 }
 
-// Override getCenter to return Google Maps-compatible object
-// Google Maps returns object with lat() and lng() methods
-// Leaflet returns object with lat and lng properties
-const originalGetCenter = map.getCenter.bind(map);
-map.getCenter = function() {
-  const center = originalGetCenter();
-  return {
-    lat: () => center.lat,
-    lng: () => center.lng,
-    _leafletLatLng: center // Keep original for internal Leaflet operations
-  };
-};
-
 // Add setCenter compatibility for controllers that use Google Maps style
-const originalSetCenter = map.setCenter ? map.setCenter.bind(map) : map.panTo.bind(map);
 map.setCenter = function(latLng) {
-  // Handle both Google Maps LatLng objects and Leaflet [lat, lng] arrays
   if (latLng && typeof latLng.lat === 'function') {
-    // Google Maps style LatLng object
-    originalSetCenter([latLng.lat(), latLng.lng()]);
-  } else if (latLng && latLng._leafletLatLng) {
-    // Our compatibility object
-    originalSetCenter(latLng._leafletLatLng);
+    map.panTo([latLng.lat(), latLng.lng()]);
   } else {
-    // Already in Leaflet format
-    originalSetCenter(latLng);
+    map.panTo(latLng);
   }
 };
 

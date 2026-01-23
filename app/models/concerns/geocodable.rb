@@ -64,7 +64,23 @@ module Geocodable
           end
         rescue
           # geocode
-        end        
+        end
+      elsif Geocoder.config.lookup == :fake_geocoder
+        begin
+          require 'geocoder/lookups/fake_geocoder'
+          lookup = Geocoder::Lookup::FakeGeocoder.new
+          results = lookup.send(:results, Geocoder::Query.new(self.address))
+          if results.present?
+            result = results.first
+            coords = result['coordinates']
+            if coords.present?
+              self.latitude = coords[0]
+              self.longitude = coords[1]
+            end
+          end
+        rescue => e
+          Rails.logger.error "[Geocodable] FakeGeocoder error: #{e.message}"
+        end
       end
     end
 

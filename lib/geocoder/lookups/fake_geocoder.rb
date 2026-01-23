@@ -123,6 +123,3 @@ module Geocoder
     end
   end
 end
-
-# Register the fake geocoder lookup
-Geocoder::Lookup.register(:fake_geocoder, Geocoder::Lookup::FakeGeocoder)

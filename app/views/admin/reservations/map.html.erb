@@ -163,7 +163,7 @@
     var map;
 
     // reservations = [[id, street, lat, lon, notes, status, phone, donation, collected, collected_amount, name, route, zone_name, admin_notes]]
-    let locations =  <%= raw @reservations %>;
+    var locations =  <%= raw @reservations %>;
 
     <%= render 'shared/leaflet_map_js' %>
 

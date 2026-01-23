@@ -2,13 +2,13 @@
 var defaultZoom, defaultCenter;
 <%- if @route %>
   defaultZoom = 15;
-  defaultCenter = new google.maps.LatLng(<%= @route.latitude %>, <%= @route.longitude %>);
+  defaultCenter = new google.maps.LatLng(<%= @route.latitude || 47.64483 %>, <%= @route.longitude || -122.54827 %>);
 <%- elsif @reservation %>
   defaultZoom = 19;
-  defaultCenter = new google.maps.LatLng(<%= @reservation.latitude %>, <%= @reservation.longitude %>);
+  defaultCenter = new google.maps.LatLng(<%= @reservation.latitude || 47.64483 %>, <%= @reservation.longitude || -122.54827 %>);
 <%- elsif @zone %>
   defaultZoom = 13;
-  defaultCenter = new google.maps.LatLng(<%= @zone.latitude %>, <%= @zone.longitude %>);
+  defaultCenter = new google.maps.LatLng(<%= @zone.latitude || 47.64483 %>, <%= @zone.longitude || -122.54827 %>);
 <%- else %>
   defaultZoom = 12;
   defaultCenter = new google.maps.LatLng(47.64483,-122.54827);

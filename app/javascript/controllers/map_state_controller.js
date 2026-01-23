@@ -12,11 +12,13 @@ export default class extends Controller {
     // Listen for Turbo navigation to save state before leaving
     this.boundSaveOnNavigate = this.saveOnNavigate.bind(this)
     document.addEventListener('turbo:before-visit', this.boundSaveOnNavigate)
+    document.addEventListener('turbo:submit-start', this.boundSaveOnNavigate)
   }
 
   disconnect() {
-    // Clean up event listener
+    // Clean up event listeners
     document.removeEventListener('turbo:before-visit', this.boundSaveOnNavigate)
+    document.removeEventListener('turbo:submit-start', this.boundSaveOnNavigate)
 
     // Remove global reference
     delete window.mapStateController
@@ -68,8 +70,8 @@ export default class extends Controller {
       const center = map.getCenter()
       const state = {
         center: {
-          lat: center.lat(),
-          lng: center.lng()
+          lat: typeof center.lat === 'function' ? center.lat() : center.lat,
+          lng: typeof center.lng === 'function' ? center.lng() : center.lng
         },
         zoom: map.getZoom(),
         timestamp: Date.now()
