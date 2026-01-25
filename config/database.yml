@@ -1,20 +1,20 @@
-#FIXME make db username generic
-
 default: &default
-  host: localhost
+  host: <%= ENV.fetch("DB_HOST", "localhost") %>
   adapter: postgresql
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   encoding: unicode
   timeout: 5000
+  username: <%= ENV.fetch("DB_USERNAME", ENV["USER"]) %>
+  password: <%= ENV.fetch("DB_PASSWORD", "") %>
 
 development:
   <<: *default
   database: tree-recycle-development
-  username: carsoncole
-  password: password
 
 test:
   <<: *default
   database: tree-recycle-test
-  username: carsoncole
-  password: password
+
+production:
+  <<: *default
+  url: <%= ENV['DATABASE_URL'] %>

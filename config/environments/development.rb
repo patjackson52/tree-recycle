@@ -75,15 +75,20 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: 'localhost:3000' }
   config.action_mailer.raise_delivery_errors = true
 
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    :address              => Rails.application.credentials.mailer.development.address,
-    :port                 => Rails.application.credentials.mailer.development.port,
-    :user_name            => Rails.application.credentials.mailer.development.user_name,
-    :password             => Rails.application.credentials.mailer.development.password,
-    :authentication       => Rails.application.credentials.mailer.development.authentication,
-    :tls                  => Rails.application.credentials.mailer.development.tls,
-    :enable_starttls_auto => Rails.application.credentials.mailer.development.enable_starttls_auto
-  }
+  mailer_creds = Rails.application.credentials.dig(:mailer, :development) rescue nil
+  if mailer_creds
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      :address              => mailer_creds.address,
+      :port                 => mailer_creds.port,
+      :user_name            => mailer_creds.user_name,
+      :password             => mailer_creds.password,
+      :authentication       => mailer_creds.authentication,
+      :tls                  => mailer_creds.tls,
+      :enable_starttls_auto => mailer_creds.enable_starttls_auto
+    }
+  else
+    config.action_mailer.delivery_method = :test
+  end
 end
 

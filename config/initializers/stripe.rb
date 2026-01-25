@@ -1,5 +1,9 @@
-Stripe.api_key = if Rails.env.production?
-  Rails.application.credentials.stripe.production.secret_key
-else
-  Rails.application.credentials.stripe.development.secret_key
+Stripe.api_key = begin
+  if Rails.env.production?
+    Rails.application.credentials.dig(:stripe, :production, :secret_key)
+  else
+    Rails.application.credentials.dig(:stripe, :development, :secret_key)
+  end
+rescue
+  nil
 end
